@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard | UniLibrary{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">My Dashboard</h1>
+        <p class="page-subtitle">Track requests, due dates, and approval progress from one place.</p>
+    </div>
+    <a href="{{ url_for('student.books') }}" class="btn btn-primary">Browse Catalog</a>
+</div>
+
+<section class="stat-grid mb-4">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Total Requests</span>
+            <span class="stat-icon primary"><i class="bi bi-collection"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Pending</span>
+            <span class="stat-icon warning"><i class="bi bi-hourglass-split"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.pending }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Approved</span>
+            <span class="stat-icon success"><i class="bi bi-patch-check"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.approved }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Overdue</span>
+            <span class="stat-icon danger"><i class="bi bi-exclamation-octagon"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.overdue }}</div>
+    </article>
+</section>
+
+<section class="surface-card">
+    <div class="card-header px-4 py-3 fw-semibold">My Requests</div>
+    <div class="card-body p-0">
+        {% if requests %}
+        <div class="catalog-table-wrap border-0 rounded-0 shadow-none">
+            <table class="table table-clean table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Requested At</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td class="fw-semibold">{{ req.book.title }}</td>
+                        <td>{{ req.duration_days }} days</td>
+                        <td>
+                            {% if req.is_overdue %}
+                            <span class="badge-soft danger">Overdue</span>
+                            {% elif req.status == 'approved' %}
+                            <span class="badge-soft success">Approved</span>
+                            {% elif req.status == 'pending' %}
+                            <span class="badge-soft warning">Pending</span>
+                            {% else %}
+                            <span class="badge-soft neutral">{{ req.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ req.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ req.due_date.strftime('%Y-%m-%d') if req.due_date else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="p-4 text-muted mb-0">No requests yet. Browse the catalog to submit your first request.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Librarian Dashboard | UniLibrary{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">Librarian Dashboard</h1>
+        <p class="page-subtitle">Monitor circulation, respond to requests, and keep the catalog healthy.</p>
+    </div>
+    <a href="{{ url_for('librarian.manage_books') }}" class="btn btn-primary">
+        <i class="bi bi-collection me-1"></i>Manage Catalog
+    </a>
+</div>
+
+<section class="stat-grid mb-4">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Total Books</span>
+            <span class="stat-icon primary"><i class="bi bi-journal-text"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Currently Issued</span>
+            <span class="stat-icon success"><i class="bi bi-arrow-up-right-circle"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.issued }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Pending Requests</span>
+            <span class="stat-icon warning"><i class="bi bi-hourglass-split"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.pending }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Overdue</span>
+            <span class="stat-icon danger"><i class="bi bi-exclamation-diamond"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.overdue }}</div>
+    </article>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <section class="surface-card h-100">
+            <div class="card-header px-4 py-3 fw-semibold">Pending Approval Requests</div>
+            <div class="card-body p-0">
+                {% if pending_requests %}
+                <div class="catalog-table-wrap border-0 rounded-0 shadow-none">
+                    <table class="table table-clean table-hover align-middle table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Duration</th>
+                                <th>Requested</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_requests %}
+                            <tr>
+                                <td>{{ req.student.username }}</td>
+                                <td>{{ req.book.title }}</td>
+                                <td>{{ req.duration_days }} days</td>
+                                <td>{{ req.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="text-end pe-4">
+                                    <form method="POST" action="{{ url_for('librarian.handle_request', req_id=req.id) }}" class="d-inline">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('librarian.handle_request', req_id=req.id) }}" class="d-inline ms-1">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="p-4 text-muted mb-0">No pending requests right now.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-4">
+        <section class="surface-card h-100 p-4">
+            <h5 class="mb-3">Recent Activity</h5>
+            {% if pending_requests %}
+            <ul class="activity-list">
+                {% for req in pending_requests[:6] %}
+                <li>
+                    <div class="fw-semibold">{{ req.student.username }} requested {{ req.book.title }}</div>
+                    <div class="activity-meta">{{ req.requested_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted mb-0">Recent activity will appear here as soon as new requests arrive.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

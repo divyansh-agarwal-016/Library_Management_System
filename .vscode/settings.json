@@ -1,0 +1,6 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python.defaultInterpreterPath": "/home/divyanshagarwal/Code/library_management/venv/bin/python",
+    "python.pythonPath": "/home/divyanshagarwal/Code/library_management/venv/bin/python",
+    "python.terminal.activateEnvironment": true
+}
