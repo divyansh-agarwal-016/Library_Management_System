@@ -1,278 +1,201 @@
-# UniLibrary
+# 📚 UniLibrary
 
-UniLibrary is a Flask-based library management system for students and librarians.  
-It supports authentication, book browsing, issue requests, request approvals, and catalog management with a clean light/dark UI.
+**UniLibrary** is a robust, Flask-based library management system designed to streamline operations for students and librarians. It features a modern role-based interface, real-time request tracking, and comprehensive catalog management, all backed by a lightweight SQLite database.
 
-## Features
+---
 
-- Role-based login for students and librarians
-- Student dashboard with request tracking
-- Book catalog with department filtering
-- Request books for a selected duration
-- Librarian dashboard with approval/rejection workflow
-- Add and delete books from the catalog
-- SQLite database by default
-- Modern responsive UI with dark mode support
-- Persistent theme preference in browser localStorage
+## ✨ Features
 
-## Tech Stack
+### 🎓 For Students
+- **Secure Access**: Dedicated login and registration.
+- **Book Discovery**: Browse the full catalog with department filtering.
+- **Borrowing System**: Request books for specific durations (3, 5, or 7 days).
+- **Dashboard**: Track request statuses and viewing history.
 
-- Python 3.12+
-- Flask
-- Flask-SQLAlchemy
-- Flask-Login
-- Werkzeug
-- SQLite
-- Jinja2 Templates
-- HTML, CSS, Bootstrap 5
+### 🛠️ For Librarians
+- **Admin Dashboard**: Overview of pending requests and catalog statistics.
+- **Request Management**: Approve or reject student book requests with one click.
+- **Catalog Control**: Add new books or delete obsolete entries.
+- **User Oversight**: Manage the student user base.
 
-## Project Structure
+### 🎨 General UI/UX
+- **Responsive Design**: Works seamlessly on desktop and mobile devices.
+- **Theme Toggle**: Switch between **Light** and **Dark** modes.
+- **Persistent Settings**: UI preferences are saved via `localStorage`.
+- **Clean Layouts**: Organized cards, data tables, and intuitive navigation.
+
+---
+
+## 🛠️ Tech Stack
+
+| Component       | Technology                                      |
+|-----------------|-------------------------------------------------|
+| **Language**    | Python 3.12+                                    |
+| **Framework**   | Flask 3.x                                       |
+| **Database**    | SQLite                                          |
+| **ORM**         | Flask-SQLAlchemy                                |
+| **Auth**        | Flask-Login                                     |
+| **Frontend**    | HTML5, CSS3, Bootstrap 5, Jinja2                |
+
+---
+
+## 📁 Project Structure
 
 ```text
 library_management/
-├── run.py
-├── seed.py
-├── reset_db.py
-├── requirement.txt
+├── run.py                   # Application entry point (starts dev server)
+├── seed.py                  # Database initialization script (creates tables + default data)
+├── reset_db.py              # Database reset script (drops tables + reseeds data)
+├── requirement.txt          # Python dependencies
 ├── instance/
-│   └── library.db
+│   └── library.db           # SQLite database file (generated automatically)
 └── app/
-    ├── __init__.py
-    ├── config.py
-    ├── extensions.py
-    ├── models.py
-    ├── static/
-    │   └── css/
-    │       └── style.css
-    ├── auth/
+    ├── __init__.py          # Application factory (creates app, registers blueprints)
+    ├── config.py            # Configuration variables (secret key, DB URI)
+    ├── extensions.py        # Shared extensions (db, login_manager)
+    ├── models.py            # Database models (User, Book, IssueRequest)
+    ├── auth/                # Authentication Blueprint
     │   ├── __init__.py
-    │   └── routes.py
-    ├── student/
+    │   └── routes.py        # Login, Register, Logout logic
+    ├── student/             # Student Blueprint
     │   ├── __init__.py
-    │   └── routes.py
-    ├── librarian/
+    │   └── routes.py        # Dashboard, Books, Request logic
+    ├── librarian/           # Librarian Blueprint
     │   ├── __init__.py
-    │   └── routes.py
-    └── templates/
-        ├── base.html
-        ├── auth/
-        │   ├── login.html
-        │   └── register.html
-        ├── student/
-        │   ├── dashboard.html
-        │   └── books.html
-        └── librarian/
-            ├── dashboard.html
-            └── books.html
+    │   └── routes.py        # Dashboard, Manage Books, Approve/Reject logic
+    ├── templates/           # Jinja2 HTML templates
+    │   ├── base.html        # Base layout with nav and theme logic
+    │   ├── auth/            # Login & Register forms
+    │   ├── student/         # Student dashboard & book list
+    │   └── librarian/       # Librarian dashboard & admin views
+    └── static/              # Global CSS and assets
+        └── css/
+            └── style.css    # Custom styling
 ```
 
-## Main Components
+---
 
-### run.py
-Starts the Flask development server.
+## 🚀 Setup & Installation
 
-### seed.py
-Creates tables and inserts default users and a sample book catalog.
-
-### reset_db.py
-Deletes the SQLite database and reseeds it from scratch.
-
-### __init__.py
-Application factory. Initializes the Flask app, database, login manager, and registers blueprints.
-
-### config.py
-Holds app configuration including the secret key and database path.
-
-### extensions.py
-Initializes shared Flask extensions like SQLAlchemy and LoginManager.
-
-### models.py
-Contains the database models:
-- `User`
-- `Book`
-- `IssueRequest`
-
-### auth
-Authentication routes:
-- login
-- register
-- logout
-
-### student
-Student features:
-- dashboard
-- browse books
-- request books
-
-### librarian
-Librarian features:
-- dashboard
-- approve/reject requests
-- manage catalog
-- delete books
-
-## Requirements
-
-Install dependencies from:
-
+### 1. Clone the Repository
 ```bash
-requirement.txt
+git clone <your-repository-url>
+cd library_management
 ```
+*If you already have the files locally, simply navigate to the project folder.*
 
-## Setup
-
-### 1. Clone or open the project
-
+### 2. Create Virtual Environment
+**macOS / Linux:**
 ```bash
-cd /home/divyanshagarwal/Code/library_management
-```
-
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-### 3. Activate the virtual environment
-
-```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
+**Windows:**
+```cmd
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-### 4. Install dependencies
-
+### 3. Install Dependencies
 ```bash
 pip install -r requirement.txt
 ```
 
-## Database Initialization
+---
 
-The app uses SQLite by default.
+## 💾 Database Initialization
 
-Default database path:
+The application uses SQLite. The database file (`instance/library.db`) is created automatically upon running the seed script.
 
-```text
-instance/library.db
-```
-
-To create the database and seed sample data:
-
+### Initialize Database
+Create tables and populate default accounts and sample books:
 ```bash
 python seed.py
 ```
 
-This will:
-- create all tables
-- create the default librarian account
-- create the default student account
-- insert the sample book catalog
-
-If you want to completely reset the database:
-
+### Reset Database
+If the database gets corrupted or you want a fresh start:
 ```bash
 python reset_db.py
 ```
+*This deletes the existing database and runs `seed.py` internally.*
 
-## Default Test Accounts
+---
 
-### Librarian
+## 🔑 Default Credentials
 
-- Username: `Admin`
-- Password: `Admin@123`
+After running `seed.py`, use these accounts to test the system:
 
-### Student
+| Role      | Username   | Password      |
+|-----------|------------|---------------|
+| Librarian | `Admin`    | `Admin@123`   |
+| Student   | `john_doe` | `Student123!` |
 
-- Username: `john_doe`
-- Password: `Student123!`
+---
 
-## Running the App
+## ▶️ Running the Application
 
-Start the development server:
-
+Start the Flask development server:
 ```bash
 python run.py
 ```
 
-Then open:
+Visit the application in your browser:
+**[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
-```text
-http://127.0.0.1:5000
-```
+---
 
-## Available Pages
+## 🗺️ Route Map
 
 ### Authentication
-- `/login`
-- `/register`
-- `/logout`
+- `GET /login` — Login page
+- `POST /login` — Process login
+- `GET /register` — Registration page
+- `POST /register` — Process registration
+- `GET /logout` — End session
 
-### Student
-- `/student/dashboard`
-- `/student/books`
-- `/student/request/<book_id>`
+### Student Module
+- `GET /student/dashboard` — View personal request stats and status
+- `GET /student/books` — Browse catalog with filters
+- `POST /student/request/<book_id>` — Submit a new book request
 
-### Librarian
-- `/librarian/dashboard`
-- `/librarian/books`
-- `/librarian/request/<req_id>/action`
+### Librarian Module
+- `GET /librarian/dashboard` — View all pending and active requests
+- `GET /librarian/books` — Manage book inventory (Add/Delete)
+- `POST /librarian/request/<req_id>/action` — Approve or Reject a request
 
-## Usage Flow
+---
 
-### Student flow
-1. Log in as a student.
-2. Open the book catalog.
-3. Filter books by department.
-4. Request a book for 3, 5, or 7 days.
-5. Track request status from the dashboard.
+## 🔄 Usage Workflows
 
-### Librarian flow
-1. Log in as the librarian.
-2. Review pending requests on the dashboard.
-3. Approve or reject requests.
-4. Manage the catalog by adding or deleting books.
+### 1. Student Borrowing Flow
+1. **Login**: Access account as a student.
+2. **Browse**: Go to the **Books** section and filter by department.
+3. **Request**: Click "Request" on a book, select duration (3/5/7 days), and submit.
+4. **Track**: Return to **Dashboard** to see if the request is Pending, Approved, or Rejected.
 
-## UI Features
+### 2. Librarian Admin Flow
+1. **Login**: Access account as a librarian.
+2. **Manage Requests**: Check **Dashboard** for pending requests. Click "Approve" or "Reject".
+3. **Update Catalog**: Go to **Manage Books** to add new titles or remove old ones.
 
-- Responsive modern layout
-- Light and dark mode
-- Theme preference saved in localStorage
-- Clean cards, tables, and catalog layout
-- Styled login/register pages with a centered auth shell
+---
 
-## Development Notes
+## 💡 Development Tips
 
-- The app uses the Flask application factory pattern.
-- The database is created automatically when seeding or when the app starts with the configured SQLite path.
-- If you change templates or CSS, refresh the browser to see updates.
-- If login credentials appear outdated, rerun `python seed.py`.
+- **Hot Reloading**: Flask's debug mode reloads the server on code changes.
+- **Theme Persistence**: The dark mode toggle saves to browser `localStorage`.
+- **Static Assets**: If CSS updates don't show, hard-refresh your browser (`Ctrl + F5` or `Cmd + Shift + R`).
+- **Factory Pattern**: The app uses `create_app()` in `app/__init__.py` for modular setup.
 
-## Troubleshooting
+---
 
-### 1. Import errors
-Make sure the virtual environment is activated:
+## 🛟 Troubleshooting
 
-```bash
-source .venv/bin/activate
-```
+| Problem                            | Solution                                                                                     |
+|------------------------------------|----------------------------------------------------------------------------------------------|
+| `ModuleNotFoundError: No module...`| Ensure the virtual environment is activated (`source .venv/bin/activate`).                   |
+| Database not found                 | Run `mkdir -p instance` then `python seed.py`.                                               |
+| Login failing / Invalid user       | The database users might be missing. Run `python reset_db.py` to recreate defaults.          |
+| UI looks broken                    | Clear browser cache or hard refresh (`Ctrl + F5`). Ensure `bootstrap` is loading correctly.  |
 
-### 2. Database file not found
-Run:
-
-```bash
-mkdir -p instance
-python seed.py
-```
-
-### 3. Login not working
-Recreate the database data:
-
-```bash
-python reset_db.py
-```
-
-### 4. UI not updating
-Hard refresh the browser:
-
-```text
-Ctrl + Shift + R
-```
