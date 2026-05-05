@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}My Profile | {{ library_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">My Profile</h1>
+        <p class="page-subtitle">View your account details and update contact information.</p>
+    </div>
+    <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <section class="surface-card p-4">
+            <div class="profile-header mb-4">
+                <div class="profile-avatar">{{ current_user.full_name[0]|upper }}</div>
+                <div>
+                    <h3 class="mb-0">{{ current_user.full_name }}</h3>
+                    <span class="badge-soft primary mt-1 d-inline-block">Faculty</span>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="profile-row">
+                    <span class="profile-label"><i class="bi bi-person-badge me-2"></i>Registration No</span>
+                    <span class="profile-value">{{ current_user.registration_no }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label"><i class="bi bi-envelope me-2"></i>Email</span>
+                    <span class="profile-value">{{ current_user.email }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label"><i class="bi bi-building me-2"></i>Department</span>
+                    <span class="profile-value">{{ current_user.department or 'N/A' }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label"><i class="bi bi-telephone me-2"></i>Phone</span>
+                    <span class="profile-value">{{ current_user.phone or 'Not provided' }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label"><i class="bi bi-book me-2"></i>Active Borrows</span>
+                    <span class="profile-value">{{ current_user.active_borrows }} / {{ current_user.max_books }}</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-7">
+        <section class="surface-card p-4">
+            <h5 class="mb-3">Update Contact</h5>
+            <form method="POST" class="vstack gap-3">
+                <div class="form-floating">
+                    <input id="phone" type="tel" name="phone" class="form-control"
+                           placeholder="Phone" value="{{ current_user.phone or '' }}">
+                    <label for="phone">Phone Number</label>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i> Save Changes
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

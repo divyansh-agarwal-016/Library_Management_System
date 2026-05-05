@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JECRC University Library Management System — Browse, borrow, and manage books digitally.">
+    <title>{% block title %}{{ library_name }}{% endblock %}</title>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("theme");
+            const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const theme = savedTheme || (systemPrefersDark ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <nav class="navbar navbar-expand-lg app-navbar sticky-top">
+        <div class="container-lg nav-grid">
+            <div class="nav-left">
+                {% if current_user.is_authenticated %}
+                <div class="nav-links">
+                    {% if current_user.role == 'student' %}
+                    <a href="{{ url_for('student.dashboard') }}" class="nav-link-item {% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('student.books') }}" class="nav-link-item {% if request.endpoint == 'student.books' %}active{% endif %}">
+                        <i class="bi bi-book"></i> Books
+                    </a>
+                    <a href="{{ url_for('student.history') }}" class="nav-link-item {% if request.endpoint == 'student.history' %}active{% endif %}">
+                        <i class="bi bi-clock-history"></i> History
+                    </a>
+                    <a href="{{ url_for('student.profile') }}" class="nav-link-item {% if request.endpoint == 'student.profile' %}active{% endif %}">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                    {% elif current_user.role == 'teacher' %}
+                    <a href="{{ url_for('teacher.dashboard') }}" class="nav-link-item {% if request.endpoint == 'teacher.dashboard' %}active{% endif %}">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('teacher.books') }}" class="nav-link-item {% if request.endpoint == 'teacher.books' %}active{% endif %}">
+                        <i class="bi bi-book"></i> Books
+                    </a>
+                    <a href="{{ url_for('teacher.history') }}" class="nav-link-item {% if request.endpoint == 'teacher.history' %}active{% endif %}">
+                        <i class="bi bi-clock-history"></i> History
+                    </a>
+                    <a href="{{ url_for('teacher.profile') }}" class="nav-link-item {% if request.endpoint == 'teacher.profile' %}active{% endif %}">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                    {% elif current_user.role == 'librarian' %}
+                    <a href="{{ url_for('librarian.dashboard') }}" class="nav-link-item {% if request.endpoint == 'librarian.dashboard' %}active{% endif %}">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('librarian.manage_books') }}" class="nav-link-item {% if request.endpoint == 'librarian.manage_books' %}active{% endif %}">
+                        <i class="bi bi-collection"></i> Catalog
+                    </a>
+                    <a href="{{ url_for('librarian.manage_users') }}" class="nav-link-item {% if request.endpoint == 'librarian.manage_users' %}active{% endif %}">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                    <a href="{{ url_for('librarian.announcements') }}" class="nav-link-item {% if request.endpoint == 'librarian.announcements' %}active{% endif %}">
+                        <i class="bi bi-megaphone"></i> Announce
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <a class="navbar-brand app-brand" href="{{ url_for('auth.login') }}">
+                <span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span>
+                <span class="brand-text">{{ university_short }} <span class="brand-accent">Library</span></span>
+            </a>
+            <div class="nav-actions">
+                <button id="themeToggle" class="btn btn-ghost btn-icon" type="button" aria-label="Toggle theme">
+                    <i class="bi bi-sun-fill theme-icon-light"></i>
+                    <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
+                </button>
+                {% if current_user.is_authenticated %}
+                <div class="user-chip">
+                    <span class="avatar">{{ current_user.full_name[0]|upper }}</span>
+                    <div class="user-meta">
+                        <span class="user-name">{{ current_user.full_name }}</span>
+                        <span class="user-role">{{ current_user.role|title }} · {{ current_user.registration_no }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm" id="logoutBtn">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-lg page-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show app-alert" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="container-lg">
+            <p>&copy; {{ university_name }} · {{ university_tagline }} · Library Management System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const themeToggle = document.getElementById("themeToggle");
+
+            function applyTheme(theme) {
+                root.setAttribute("data-theme", theme);
+                localStorage.setItem("theme", theme);
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener("click", function () {
+                    const current = root.getAttribute("data-theme") || "light";
+                    applyTheme(current === "dark" ? "light" : "dark");
+                });
+            }
+        })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Reservations | {{ library_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">Reservation Waitlist</h1>
+        <p class="page-subtitle">Users waiting for books that are currently issued.</p>
+    </div>
+    <a href="{{ url_for('librarian.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<section class="catalog-table-wrap">
+    <table class="table table-clean table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Book</th>
+                <th>Reserved At</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in reservations %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    <div class="fw-semibold">{{ res.user.full_name }}</div>
+                    <small class="text-muted">{{ res.user.registration_no }}</small>
+                </td>
+                <td><span class="badge-soft neutral">{{ res.user.role|title }}</span></td>
+                <td>{{ res.book.title }}</td>
+                <td>{{ res.reserved_at.strftime('%d %b %Y, %H:%M') }}</td>
+                <td>
+                    {% if res.status == 'waiting' %}
+                    <span class="badge-soft warning">Waiting</span>
+                    {% elif res.status == 'notified' %}
+                    <span class="badge-soft success">Notified</span>
+                    {% else %}
+                    <span class="badge-soft neutral">{{ res.status|title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">No reservations in the waitlist.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Register | {{ library_name }}{% endblock %}
+{% block body_class %}auth-page auth-page-bg{% endblock %}
+{% block content %}
+<section class="auth-shell auth-shell-wide">
+    <div class="auth-grid">
+        <div class="auth-hero">
+            <img src="{{ url_for('static', filename='images/jecrc_logo.png') }}" alt="JECRC University Logo" class="auth-logo">
+            <p class="auth-desc">
+                Create your profile to request books, access open resources, track your borrowing history, and manage all library activity digitally.
+            </p>
+            <div class="auth-hero-stats">
+                <div class="hero-stat">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Students & Teachers</span>
+                </div>
+                <div class="hero-stat">
+                    <i class="bi bi-journal-bookmark"></i>
+                    <span>Borrow & Renew</span>
+                </div>
+                <div class="hero-stat">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                </div>
+            </div>
+        </div>
+        <div class="auth-form-wrap">
+            <h2 class="mb-1">Create your account</h2>
+            <p class="text-muted mb-4">Register using your university registration number</p>
+            <form method="POST" class="vstack gap-3" id="registerForm">
+                <div class="form-floating">
+                    <input id="registration_no" type="text" name="registration_no" class="form-control"
+                           placeholder="e.g. 24bcon2125" required
+                           value="{{ request.form.get('registration_no', '') }}">
+                    <label for="registration_no">Registration No (e.g. 24bcon2125)</label>
+                </div>
+                <div class="form-floating">
+                    <input id="full_name" type="text" name="full_name" class="form-control"
+                           placeholder="Full Name" required
+                           value="{{ request.form.get('full_name', '') }}">
+                    <label for="full_name">Full Name</label>
+                </div>
+                <div class="form-floating">
+                    <input id="email" type="email" name="email" class="form-control"
+                           placeholder="e.g. utkarsh.24bcon2125@jecrcu.edu.in" required
+                           value="{{ request.form.get('email', '') }}">
+                    <label for="email">University Email (firstname.regNo@jecrcu.edu.in)</label>
+                </div>
+                <div class="form-floating">
+                    <select id="department" name="department" class="form-select" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if request.form.get('department') == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="department">Department</label>
+                </div>
+                <div class="form-floating">
+                    <input id="phone" type="tel" name="phone" class="form-control"
+                           placeholder="Phone (optional)"
+                           value="{{ request.form.get('phone', '') }}">
+                    <label for="phone">Phone (optional)</label>
+                </div>
+                <div class="role-selector">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="student" checked>
+                        <div class="role-card">
+                            <i class="bi bi-mortarboard"></i>
+                            <span>Student</span>
+                        </div>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="teacher"
+                               {% if request.form.get('role') == 'teacher' %}checked{% endif %}>
+                        <div class="role-card">
+                            <i class="bi bi-person-workspace"></i>
+                            <span>Teacher</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="form-floating">
+                    <input id="password" type="password" name="password" class="form-control"
+                           placeholder="Password" required minlength="6">
+                    <label for="password">Password (min 6 characters)</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2" id="registerBtn">
+                    <i class="bi bi-person-check me-1"></i> Create Account
+                </button>
+            </form>
+            <p class="text-muted text-center mt-3 mb-0">
+                Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

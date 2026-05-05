@@ -1,0 +1,36 @@
+# Virtual environments
+venv/
+venv_win/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# SQLite database
+instance/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Environment variables
+.env
+.flaskenv

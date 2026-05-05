@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block title %}Librarian Dashboard | {{ library_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">Librarian Dashboard</h1>
+        <p class="page-subtitle">Monitor circulation, respond to requests, and keep the catalog healthy.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('librarian.export_books_csv') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-download me-1"></i>Export Books
+        </a>
+        <a href="{{ url_for('librarian.export_history_csv') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-download me-1"></i>Export History
+        </a>
+        <a href="{{ url_for('librarian.manage_books') }}" class="btn btn-primary">
+            <i class="bi bi-collection me-1"></i>Manage Catalog
+        </a>
+    </div>
+</div>
+
+<section class="stat-grid stat-grid-6 mb-4">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Total Titles</span>
+            <span class="stat-icon primary"><i class="bi bi-journal-text"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Total Copies</span>
+            <span class="stat-icon primary"><i class="bi bi-stack"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total_copies }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Issued</span>
+            <span class="stat-icon success"><i class="bi bi-arrow-up-right-circle"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.issued }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Pending</span>
+            <span class="stat-icon warning"><i class="bi bi-hourglass-split"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.pending }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Overdue</span>
+            <span class="stat-icon danger"><i class="bi bi-exclamation-diamond"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.overdue }}</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Users</span>
+            <span class="stat-icon primary"><i class="bi bi-people"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.users }}</div>
+    </article>
+</section>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <section class="surface-card p-4">
+            <h5 class="mb-3">Books by Department</h5>
+            <canvas id="deptChart" height="250"></canvas>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="surface-card p-4">
+            <h5 class="mb-3">Request Status Distribution</h5>
+            <canvas id="statusChart" height="250"></canvas>
+        </section>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <section class="surface-card h-100">
+            <div class="card-header px-4 py-3 fw-semibold">
+                <i class="bi bi-clock-history me-1"></i> Pending Approval Requests
+                {% if pending_requests %}<span class="badge bg-warning text-dark ms-2">{{ pending_requests|length
+                    }}</span>{% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if pending_requests %}
+                <div class="catalog-table-wrap border-0 rounded-0 shadow-none">
+                    <table class="table table-clean table-hover align-middle table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Book</th>
+                                <th>Duration</th>
+                                <th>Requested</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_requests %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ req.user.full_name }}</div>
+                                    <small class="text-muted">{{ req.user.registration_no }}</small>
+                                </td>
+                                <td><span class="badge-soft neutral">{{ req.user.role|title }}</span></td>
+                                <td>{{ req.book.title }}</td>
+                                <td>{{ req.duration_days }}d</td>
+                                <td>{{ req.requested_at.strftime('%d %b, %H:%M') }}</td>
+                                <td class="text-end pe-4">
+                                    <form method="POST"
+                                        action="{{ url_for('librarian.handle_request', req_id=req.id) }}"
+                                        class="d-inline">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+                                    </form>
+                                    <form method="POST"
+                                        action="{{ url_for('librarian.handle_request', req_id=req.id) }}"
+                                        class="d-inline ms-1">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="p-4 text-muted mb-0">No pending requests right now.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-5">
+        <section class="surface-card h-100">
+            <div class="card-header px-4 py-3 fw-semibold">
+                <i class="bi bi-book me-1"></i> Currently Issued Books
+                {% if issued_books %}<span class="badge bg-success ms-2">{{ issued_books|length }}</span>{% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if issued_books %}
+                <div class="catalog-table-wrap border-0 rounded-0 shadow-none">
+                    <table class="table table-clean table-hover align-middle table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Book</th>
+                                <th>Due</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in issued_books %}
+                            <tr>
+                                <td>
+                                    <small class="fw-semibold">{{ req.user.full_name }}</small>
+                                </td>
+                                <td>
+                                    <small>{{ req.book.title }}</small>
+                                    {% if req.is_overdue %}
+                                    <br><span class="badge-soft danger" style="font-size:0.65rem">OVERDUE · ₹{{
+                                        "%.0f"|format(req.calculated_fine) }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ req.due_date.strftime('%d %b') if req.due_date else '-' }}</small></td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('librarian.return_book', req_id=req.id) }}"
+                                        class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success"
+                                            title="Mark as returned">
+                                            <i class="bi bi-check2-circle"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="p-4 text-muted mb-0">No books currently issued.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    // @ts-nocheck
+    (function () {
+        const rootStyle = getComputedStyle(document.documentElement);
+        const textColor = rootStyle.getPropertyValue('--text').trim() || '#333';
+        const mutedColor = rootStyle.getPropertyValue('--text-muted').trim() || '#999';
+        const borderColor = rootStyle.getPropertyValue('--border').trim() || '#ddd';
+
+        const palette = [
+            '#c0392b', '#e74c3c', '#e67e22', '#f39c12', '#27ae60',
+            '#2ecc71', '#3498db', '#2980b9', '#9b59b6', '#8e44ad',
+            '#1abc9c', '#16a085', '#d35400', '#c0392b', '#7f8c8d',
+        ];
+
+        // Department chart
+        const deptLabels = {{ dept_stat| map(attribute = 0) | list | tojson
+    }};
+    const deptValues = {{ dept_stats| map(attribute = 1) | list | tojson }};
+
+    if (document.getElementById('deptChart')) {
+        new Chart(document.getElementById('deptChart'), {
+            type: 'bar',
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    label: 'Books',
+                    data: deptValues,
+                    backgroundColor: palette.slice(0, deptLabels.length),
+                    borderRadius: 6,
+                    maxBarThickness: 40,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: mutedColor, font: { size: 10 } }, grid: { color: borderColor } },
+                    y: { beginAtZero: true, ticks: { color: mutedColor }, grid: { color: borderColor } },
+                }
+            }
+        });
+    }
+
+    // Status chart
+    const statusLabels = {{ status_stats| map(attribute = 0) | list | tojson }};
+    const statusValues = {{ status_stats| map(attribute = 1) | list | tojson }};
+    const statusColors = { pending: '#f39c12', approved: '#27ae60', rejected: '#95a5a6', returned: '#3498db' };
+
+    if (document.getElementById('statusChart')) {
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                datasets: [{
+                    data: statusValues,
+                    backgroundColor: statusLabels.map(s => statusColors[s] || '#7f8c8d'),
+                    borderWidth: 2,
+                    borderColor: rootStyle.getPropertyValue('--surface').trim() || '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: textColor, padding: 16 } },
+                }
+            }
+        });
+    }
+}) ();
+</script>
+{% endblock %}

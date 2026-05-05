@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Borrow History | {{ library_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">Borrow History</h1>
+        <p class="page-subtitle">Complete record of all your library activity.</p>
+    </div>
+    <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<section class="surface-card">
+    <div class="card-body p-0">
+        {% if requests %}
+        <div class="catalog-table-wrap border-0 rounded-0 shadow-none">
+            <table class="table table-clean table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Book</th>
+                        <th>Author</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Due Date</th>
+                        <th>Returned</th>
+                        <th>Fine</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="fw-semibold">{{ req.book.title }}</td>
+                        <td>{{ req.book.author }}</td>
+                        <td>{{ req.duration_days }}d</td>
+                        <td>
+                            {% if req.is_overdue %}
+                            <span class="badge-soft danger">Overdue</span>
+                            {% elif req.status == 'approved' %}
+                            <span class="badge-soft success">Active</span>
+                            {% elif req.status == 'pending' %}
+                            <span class="badge-soft warning">Pending</span>
+                            {% elif req.status == 'returned' %}
+                            <span class="badge-soft primary">Returned</span>
+                            {% else %}
+                            <span class="badge-soft neutral">{{ req.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ req.requested_at.strftime('%d %b %Y') }}</td>
+                        <td>{{ req.due_date.strftime('%d %b %Y') if req.due_date else '-' }}</td>
+                        <td>{{ req.returned_at.strftime('%d %b %Y') if req.returned_at else '-' }}</td>
+                        <td>
+                            {% if req.fine_amount > 0 %}
+                            <span class="text-danger">₹{{ "%.0f"|format(req.fine_amount) }}</span>
+                            {% elif req.is_overdue %}
+                            <span class="text-danger">₹{{ "%.0f"|format(req.calculated_fine) }}</span>
+                            {% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="p-4 text-muted mb-0">No borrow history yet.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

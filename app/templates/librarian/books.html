@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Manage Catalog | {{ library_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2 mb-4">
+    <div>
+        <h1 class="app-page-title">Manage Catalog</h1>
+        <p class="page-subtitle">Add titles with ISBN, publisher, and copy count. Search and manage your inventory.</p>
+    </div>
+    <a href="{{ url_for('librarian.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<section class="catalog-panel mb-4">
+    <h5 class="mb-3"><i class="bi bi-plus-circle me-1"></i> Add New Book</h5>
+    <form method="POST" class="row g-3">
+        <div class="col-lg-3"><input type="text" name="title" class="form-control" placeholder="Title *" required></div>
+        <div class="col-lg-2"><input type="text" name="author" class="form-control" placeholder="Author *" required></div>
+        <div class="col-lg-2">
+            <select name="department" class="form-select" required>
+                <option value="">Department *</option>
+                {% for department in departments %}
+                <option value="{{ department }}">{{ department }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-2"><input type="text" name="isbn" class="form-control" placeholder="ISBN (optional)"></div>
+        <div class="col-lg-2"><input type="text" name="publisher" class="form-control" placeholder="Publisher (optional)"></div>
+        <div class="col-lg-1"><input type="text" name="edition" class="form-control" placeholder="Edition"></div>
+        <div class="col-lg-1"><input type="number" name="year" class="form-control" placeholder="Year" min="1900" max="2099"></div>
+        <div class="col-lg-1"><input type="number" name="total_copies" class="form-control" placeholder="Copies" value="1" min="1"></div>
+        <div class="col-lg-3"><input type="url" name="download_url" class="form-control" placeholder="Open Access PDF URL (optional)"></div>
+        <div class="col-lg-2 d-grid"><button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Book</button></div>
+    </form>
+</section>
+
+<div class="catalog-toolbar mb-3">
+    <form method="GET" class="search-form">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" name="q" class="form-control" placeholder="Search catalog..."
+                   value="{{ search_query }}">
+        </div>
+    </form>
+    <span class="text-muted">{{ books|length }} titles in catalog</span>
+</div>
+
+<section class="catalog-table-wrap">
+    <table class="table table-clean table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Department</th>
+                <th>ISBN</th>
+                <th>Copies</th>
+                <th>Status</th>
+                <th class="text-end pe-4">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td class="fw-semibold">
+                    {{ book.title }}
+                    {% if book.publisher %}<br><small class="text-muted">{{ book.publisher }}{% if book.edition %} · {{ book.edition }}{% endif %}{% if book.year %} · {{ book.year }}{% endif %}</small>{% endif %}
+                </td>
+                <td>{{ book.author }}</td>
+                <td><small>{{ book.department }}</small></td>
+                <td><small>{{ book.isbn or '-' }}</small></td>
+                <td>{{ book.available_copies }}/{{ book.total_copies }}</td>
+                <td>
+                    {% if book.is_available %}
+                    <span class="badge-soft success">Available</span>
+                    {% else %}
+                    <span class="badge-soft danger">All Issued</span>
+                    {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                    <a href="{{ url_for('librarian.book_qrcode', book_id=book.id) }}" 
+                       class="btn btn-sm btn-outline-primary me-1" title="Download QR Code" target="_blank">
+                        <i class="bi bi-qr-code"></i>
+                    </a>
+                    {% if book.issued_copies == 0 %}
+                    <form method="POST" action="{{ url_for('librarian.delete_book', book_id=book.id) }}" class="d-inline" onsubmit="return confirm('Delete this book?');">
+                        <button type="submit" class="icon-btn-danger" title="Delete book" aria-label="Delete book">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-sm btn-outline-secondary" disabled>Has Issues</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">No books in the catalog.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

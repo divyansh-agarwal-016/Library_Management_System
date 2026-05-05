@@ -1,0 +1,7 @@
+Flask==3.0.2
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Werkzeug==3.0.1
+qrcode[pil]>=8.0
+Pillow>=9.1.0
+Flask-Mail>=0.10.0
